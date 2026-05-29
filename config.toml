@@ -1,0 +1,76 @@
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+developer_instructions = """
+当用户要求生成、下载、转换、导出、解压、构建或整理任何文件/文件夹时，任务结束后只保留用户明确需要的最终输出结果。任务过程中产生的临时 ZIP、压缩包、解压中间目录、缓存文件、草稿文件、预览文件、日志文件、构建中间产物等辅助文件应在任务完成后清理掉。清理前确认不会删除用户原本已有的文件或仍有用的工作文件。
+"""
+[windows]
+sandbox = "elevated"
+
+[projects.'c:\users\田彧安\documents\codex\2026-04-22-python-gds']
+trust_level = "trusted"
+
+[projects.'c:\users\田彧安\documents\codex\2026-04-24-python']
+trust_level = "trusted"
+
+[projects.'c:\users\田彧安\documents\codex\2026-05-06\files-mentioned-by-the-user-1']
+trust_level = "trusted"
+
+[projects.'c:\users\田彧安\documents\codex\2026-05-07\zotero']
+trust_level = "trusted"
+
+[projects.'c:\users\田彧安\documents\codex\2026-05-29\github']
+trust_level = "trusted"
+
+[projects.'d:\博士\课题1 二氧化钒全角度光电探测器\模拟\fdtd']
+trust_level = "trusted"
+
+[marketplaces.openai-bundled]
+last_updated = "2026-05-29T09:14:31Z"
+source_type = "local"
+source = '\\?\C:\Users\田彧安\.codex\.tmp\bundled-marketplaces\openai-bundled'
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-05-29T08:16:41Z"
+source_type = "local"
+source = '\\?\C:\Users\田彧安\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
+
+[plugins."zotero@openai-curated"]
+enabled = true
+
+[plugins."github@openai-curated"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[desktop]
+conversationDetailMode = "STEPS_COMMANDS"
+
+[features]
+js_repl = false
+
+[mcp_servers.node_repl]
+args = []
+command = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\bin\3c238e29bbc930ff\node_repl.exe'
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = ""
+NODE_REPL_NODE_PATH = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\bin\5b9024f90663758b\node.exe'
+NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\田彧安\.codex'
+CODEX_HOME = 'C:\Users\田彧安\.codex'
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "496c7b3cb95b4bc20cff49b513150606e0da0000c92bf752206bee5a6c248423"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+BROWSER_USE_MARKETPLACE_NAME = "openai-bundled"
+NODE_REPL_UNTRUSTED_ENV_ALLOWLIST = "BROWSER_USE_MARKETPLACE_NAME"
+CODEX_CLI_PATH = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\bin\958d608b5e0546a5\codex.exe'
