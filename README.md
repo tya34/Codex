@@ -1,21 +1,65 @@
-# Codex 配置
+# Codex 全局配置同步
 
-这个仓库用于保存 Codex 的全局配置、偏好记忆和可迁移的工作交接记录，方便以后在其他电脑继续工作。
+这个仓库用于保存 Codex 的可迁移全局指令。目标是在其他电脑上打开 Codex 后，可以直接从 GitHub 读取这些文件，并把同样的行为规则写入那台设备的本地 Codex 配置。
 
-## 当前全局规则
+## 文件作用
 
-已修改为更通用的全局规则了。
+- `config.toml`：当前这台电脑的 Codex 全局配置快照。最重要的是其中的 `developer_instructions`，它规定了文件生成、下载、转换、导出、解压、构建或整理任务完成后，只保留用户明确需要的最终结果，并清理临时 ZIP、缓存、草稿、预览、日志和中间产物等辅助文件。
+- `memories/download-cleanup.md`：同一条输出清理偏好的记忆文件。它让 Codex 在跨会话时也能记住：生成或下载文件后，清理中间辅助文件，只保留最终输出。
 
-现在规则是：以后我生成、下载、转换、导出、解压、构建或整理任何文件时，任务结束后只保留你明确需要的最终输出结果，临时 ZIP、缓存、草稿、预览、日志、中间构建产物等辅助文件都会清理掉。清理前仍会确认不会误删你原本已有或仍有用的文件。
+## 在其他 Windows 设备同步
 
-## 快捷命令
+推荐做法是只同步 `developer_instructions` 和记忆文件，因为完整的 `config.toml` 里包含本机路径、插件缓存路径和本机 MCP 路径，其他电脑可能不同。
 
-当用户说“把这次工作整理上传”时，Codex 应整理本次工作的最终文件、关键对话结论、操作记录、仓库链接、当前进度和后续待办；优先生成或更新 `README.md`、`WORKLOG.md`、`NEXT_STEPS.md`；只上传最终输出和整理后的记录，不上传临时文件、缓存、草稿、日志或中间产物。
+在另一台 Windows 电脑上打开 PowerShell，运行：
 
-## 文件说明
+```powershell
+$repo = "https://raw.githubusercontent.com/tya34/Codex-/main"
+$codexHome = Join-Path $env:USERPROFILE ".codex"
+$memories = Join-Path $codexHome "memories"
+$configPath = Join-Path $codexHome "config.toml"
+$remoteConfig = Join-Path $codexHome "config.github.toml"
+$backup = Join-Path $codexHome ("config.toml.bak-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
-- `config.toml`：当前本机 Codex 全局配置快照。
-- `memories/download-cleanup.md`：输出清理偏好。
-- `memories/work-upload-command.md`：“把这次工作整理上传”快捷命令偏好。
-- `WORKLOG.md`：本次工作的整理记录。
-- `NEXT_STEPS.md`：后续在其他电脑继续工作时的建议步骤。
+New-Item -ItemType Directory -Force -Path $codexHome, $memories | Out-Null
+Invoke-WebRequest "$repo/config.toml" -OutFile $remoteConfig
+Invoke-WebRequest "$repo/memories/download-cleanup.md" -OutFile (Join-Path $memories "download-cleanup.md")
+
+if (Test-Path $configPath) {
+    Copy-Item $configPath $backup
+    $local = Get-Content $configPath -Raw -Encoding UTF8
+} else {
+    $local = ""
+}
+
+$remote = Get-Content $remoteConfig -Raw -Encoding UTF8
+$instruction = [regex]::Match($remote, '(?s)developer_instructions\s*=\s*""".*?"""').Value
+if (-not $instruction) { throw "未能从 GitHub config.toml 中读取 developer_instructions" }
+
+if ($local -match '(?s)developer_instructions\s*=\s*""".*?"""') {
+    $local = [regex]::Replace($local, '(?s)developer_instructions\s*=\s*""".*?"""', $instruction, 1)
+} else {
+    $local = $instruction + "`n`n" + $local
+}
+
+Set-Content -Path $configPath -Value $local -Encoding UTF8
+Remove-Item $remoteConfig -Force
+Write-Host "已同步 Codex 全局指令和 download-cleanup 记忆文件。请重启 Codex。"
+```
+
+这段命令会先备份其他设备原有的 `config.toml`，然后只把 GitHub 里的 `developer_instructions` 合并进去，避免覆盖那台电脑自己的路径、插件和本地运行配置。
+
+## 完整覆盖方式
+
+只有在另一台电脑的 Codex 安装路径、用户名、插件缓存路径都和这台电脑一致时，才建议完整覆盖：
+
+```powershell
+$repo = "https://raw.githubusercontent.com/tya34/Codex-/main"
+$codexHome = Join-Path $env:USERPROFILE ".codex"
+New-Item -ItemType Directory -Force -Path (Join-Path $codexHome "memories") | Out-Null
+Copy-Item (Join-Path $codexHome "config.toml") (Join-Path $codexHome ("config.toml.bak-" + (Get-Date -Format "yyyyMMdd-HHmmss"))) -ErrorAction SilentlyContinue
+Invoke-WebRequest "$repo/config.toml" -OutFile (Join-Path $codexHome "config.toml")
+Invoke-WebRequest "$repo/memories/download-cleanup.md" -OutFile (Join-Path $codexHome "memories\download-cleanup.md")
+```
+
+同步完成后重启 Codex，新设备就会读取这些全局指令。
