@@ -18,11 +18,14 @@ trust_level = "trusted"
 [projects.'C:\博士\cedex']
 trust_level = "trusted"
 
+[projects.'c:\users\tya\documents\codex\2026-05-29\codex']
+trust_level = "trusted"
+
 [windows]
 sandbox = "elevated"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-05-29T15:24:00Z"
+last_updated = "2026-05-29T15:42:51Z"
 source_type = "local"
 source = '\\?\C:\Users\tya\.codex\.tmp\bundled-marketplaces\openai-bundled'
 
@@ -40,10 +43,10 @@ enabled = true
 [plugins."presentations@openai-primary-runtime"]
 enabled = true
 
-[plugins."browser@openai-bundled"]
+[plugins."github@openai-curated"]
 enabled = true
 
-[plugins."github@openai-curated"]
+[plugins."browser@openai-bundled"]
 enabled = true
 
 [desktop]
