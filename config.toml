@@ -4,6 +4,8 @@ developer_instructions = """
 当用户要求生成、下载、转换、导出、解压、构建或整理任何文件/文件夹时，任务结束后只保留用户明确需要的最终输出结果。任务过程中产生的临时 ZIP、压缩包、解压中间目录、缓存文件、草稿文件、预览文件、日志文件、构建中间产物等辅助文件应在任务完成后清理掉。清理前确认不会删除用户原本已有的文件或仍有用的工作文件。
 
 当用户说“把这次工作整理上传”或表达类似意思时，将其视为固定工作流：整理本次工作的最终文件、关键对话结论、操作记录、仓库链接、当前进度和后续待办；优先生成或更新 README.md、WORKLOG.md、NEXT_STEPS.md 等便于在其他电脑继续工作的记录文件；只上传最终输出和整理后的记录，不上传临时文件、缓存、草稿、日志或中间产物；上传后清理任务过程中产生的辅助文件，并在清理前确认不会删除用户原本已有或仍有用的文件。
+
+当用户要求上传或下载文件并需要同步到本地/远端时，如果目标位置已经存在同名文件，直接用同步来源覆盖目标同名文件；不要为了覆盖操作额外创建本地备份文件或备份文件夹。除非用户明确要求保留历史版本，否则只保留覆盖后的最终同步结果，并清理下载 ZIP、解压目录等辅助文件。
 """
 
 [projects.'C:\Users\tya\Documents\New project']
@@ -21,16 +23,22 @@ trust_level = "trusted"
 [projects.'c:\users\tya\documents\codex\2026-05-29\codex']
 trust_level = "trusted"
 
+[projects.'c:\users\tya\documents\codex\2026-06-02\codex']
+trust_level = "trusted"
+
+[projects.'c:\博士\博资考']
+trust_level = "trusted"
+
 [windows]
 sandbox = "elevated"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-05-29T15:42:51Z"
+last_updated = "2026-06-03T05:21:13Z"
 source_type = "local"
 source = '\\?\C:\Users\tya\.codex\.tmp\bundled-marketplaces\openai-bundled'
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-05-26T04:58:37Z"
+last_updated = "2026-06-03T05:11:07Z"
 source_type = "local"
 source = '\\?\C:\Users\tya\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
 
@@ -43,10 +51,10 @@ enabled = true
 [plugins."presentations@openai-primary-runtime"]
 enabled = true
 
-[plugins."github@openai-curated"]
+[plugins."browser@openai-bundled"]
 enabled = true
 
-[plugins."browser@openai-bundled"]
+[plugins."github@openai-curated"]
 enabled = true
 
 [desktop]
@@ -59,7 +67,7 @@ js_repl = false
 
 [mcp_servers.node_repl]
 args = []
-command = 'C:\Users\tya\AppData\Local\OpenAI\Codex\bin\3c238e29bbc930ff\node_repl.exe'
+command = 'C:\Users\tya\AppData\Local\OpenAI\Codex\bin\34ab3e1324cc55b5\node_repl.exe'
 startup_timeout_sec = 120
 
 [mcp_servers.node_repl.env]
@@ -68,8 +76,9 @@ NODE_REPL_NODE_MODULE_DIRS = ""
 NODE_REPL_NODE_PATH = 'C:\Users\tya\AppData\Local\OpenAI\Codex\bin\5b9024f90663758b\node.exe'
 NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\tya\.codex'
 CODEX_HOME = 'C:\Users\tya\.codex'
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "496c7b3cb95b4bc20cff49b513150606e0da0000c92bf752206bee5a6c248423"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "4b6bfaf4ed2ce9b5cd68e60a61642eb4927a36306ba8c8993f6058607b3530fb,e13c388c2427308a68dffc803e1f28316077b719672e4518a621ae6ab56ad7cf"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-BROWSER_USE_MARKETPLACE_NAME = "openai-bundled"
-NODE_REPL_UNTRUSTED_ENV_ALLOWLIST = "BROWSER_USE_MARKETPLACE_NAME"
-CODEX_CLI_PATH = 'C:\Users\tya\AppData\Local\OpenAI\Codex\bin\958d608b5e0546a5\codex.exe'
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+CODEX_CLI_PATH = 'C:\Users\tya\AppData\Local\OpenAI\Codex\bin\716dda49c14d31a0\codex.exe'
