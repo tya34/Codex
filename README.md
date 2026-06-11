@@ -75,7 +75,7 @@ function Set-WindowsSandbox {
     param([string]$Text)
 
     $sectionPattern = '(?ms)^\[windows\].*?(?=^\[|\z)'
-    $section = "[windows]`nsandbox = \"elevated\"`n"
+    $section = "[windows]`nsandbox = `"elevated`"`n"
     if ($Text -match $sectionPattern) {
         return [regex]::Replace($Text, $sectionPattern, $section, 1)
     }
@@ -85,7 +85,7 @@ function Set-WindowsSandbox {
 function Ensure-PluginEnabled {
     param([string]$Text, [string]$PluginName)
 
-    $section = "[plugins.\"$PluginName\"]"
+    $section = '[plugins."' + $PluginName + '"]'
     if ($Text.Contains($section)) { return $Text }
     return $Text.TrimEnd() + "`n`n$section`nenabled = true`n"
 }
