@@ -4,9 +4,18 @@
 
 ## 当前文件
 
-- `config.toml`：当前电脑的 Codex 配置快照。里面包含清理检查硬规则、模型设置、沙盒设置、已启用插件和本机项目 trust 路径。
+- `config.toml`：当前电脑的 Codex 配置快照。里面包含清理检查硬规则、GitHub 操作方式选择规则、模型设置、沙盒设置、已启用插件和本机项目 trust 路径。
 
 仓库现在只保留最终配置和说明文档；旧的临时记忆文件、缓存说明或中间辅助文件不再保留。
+
+## 本次配置更新
+
+这次更新加入了两类内容：
+
+- GitHub 操作方式选择规则：小型文档或配置更新优先使用 Codex GitHub 连接器；多文件代码修改、需要测试、需要完整 diff 或复杂冲突处理时优先使用 GitHub Desktop 或本地 Git；如果用户想自己掌控提交前检查，优先建议 GitHub Desktop。
+- 临时备份清理规则：如果任务为了安全创建了临时备份、回滚文件或导出备份，在操作验证成功后也必须删除；只有用户明确要求保留，或该备份本身就是最终交付物时才保留。
+
+另外，README 记录了如何把 GitHub Desktop 自带的 Git 加入 Windows 用户 PATH，方便在其他电脑上直接使用 `git` 命令。
 
 ## 重要提醒
 
@@ -22,6 +31,68 @@
 - Zotero：`zotero@openai-curated`
 
 当前配置还会启用 Browser 插件：`browser@openai-bundled`。如果目标电脑没有安装 GitHub 或 Zotero 插件，只写入 `enabled = true` 还不够，需要先在 Codex 里安装对应插件并完成授权或本地应用配置。
+
+## GitHub 操作方式选择
+
+当前全局配置采用下面的默认判断：
+
+- 小型文档或配置更新：优先使用 Codex GitHub 连接器。它不需要本地 clone，也不依赖本机 `git` / `gh` 是否可用，适合快速同步确定改动。
+- 多文件代码修改、需要本地测试、需要完整 diff、需要构建验证或复杂冲突处理：优先使用 GitHub Desktop 或本地 Git 工作流。
+- 如果用户想自己掌控提交前检查、查看图形化 diff 或手动确认提交内容：优先建议使用 GitHub Desktop。
+- 如果用户只想让 Codex 快速同步一个明确的小改动：优先使用 GitHub 连接器；如果需要把多个文件合成单个提交，需要明确说明连接器默认可能产生逐文件提交，并按需要改用本地 Git 或更完整的 GitHub API 提交流程。
+
+## 启用 GitHub Desktop 内置 Git
+
+GitHub Desktop 自带 Git，但它通常不会自动把 `git.exe` 加进普通 PowerShell 的 PATH。可以在另一台 Windows 电脑上运行下面的 PowerShell，把 GitHub Desktop 内置 Git 加入“用户 PATH”：
+
+```powershell
+$githubDesktop = Join-Path $env:LOCALAPPDATA "GitHubDesktop"
+if (-not (Test-Path $githubDesktop)) {
+    throw "未找到 GitHub Desktop 目录：$githubDesktop"
+}
+
+$gitCmd = Get-ChildItem -Path $githubDesktop -Directory -Filter "app-*" |
+    Sort-Object Name -Descending |
+    ForEach-Object { Join-Path $_.FullName "resources\app\git\cmd" } |
+    Where-Object { Test-Path (Join-Path $_ "git.exe") } |
+    Select-Object -First 1
+
+if (-not $gitCmd) {
+    throw "未找到 GitHub Desktop 内置 git.exe。请确认 GitHub Desktop 已安装并至少启动过一次。"
+}
+
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+$parts = @()
+if ($userPath) {
+    $parts = $userPath -split ";" | Where-Object { $_ -ne "" }
+}
+
+$exists = $parts | Where-Object { $_.TrimEnd("\") -ieq $gitCmd.TrimEnd("\") }
+if (-not $exists) {
+    [Environment]::SetEnvironmentVariable("Path", (($parts + $gitCmd) -join ";"), "User")
+}
+
+if (($env:Path -split ";" | Where-Object { $_.TrimEnd("\") -ieq $gitCmd.TrimEnd("\") }).Count -eq 0) {
+    $env:Path = $env:Path.TrimEnd(";") + ";" + $gitCmd
+}
+
+try {
+    Add-Type -Namespace Win32 -Name NativeMethods -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("user32.dll", SetLastError=true, CharSet=System.Runtime.InteropServices.CharSet.Auto)]
+public static extern System.IntPtr SendMessageTimeout(System.IntPtr hWnd, uint Msg, System.IntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out System.IntPtr lpdwResult);
+'@
+    $result = [IntPtr]::Zero
+    [void][Win32.NativeMethods]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, "Environment", 2, 5000, [ref]$result)
+} catch {
+    Write-Warning "已更新用户 PATH，但发送环境变量刷新通知失败。重开终端后仍会生效。"
+}
+
+git --version
+Write-Host "已加入用户 PATH：$gitCmd"
+Write-Host "请重开 PowerShell、GitHub Desktop 或 Codex，让新 PATH 被新进程继承。"
+```
+
+推荐加到用户 PATH，而不是机器级系统 PATH。用户 PATH 不需要管理员权限，也足够让当前用户的 PowerShell、Codex 和大多数开发工具找到 `git`。
 
 ## 推荐：安全合并配置
 
