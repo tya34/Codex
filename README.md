@@ -14,6 +14,15 @@
 
 因此，在其他电脑上更新配置时，推荐使用“安全合并”：只同步可迁移的全局指令和通用偏好，不直接覆盖整份本地配置。这样可以避免破坏那台电脑自己的沙盒、插件、本地路径和 MCP 配置。
 
+## 插件提醒
+
+在其他电脑上同步配置后，请确认至少安装并启用这两个插件：
+
+- GitHub：`github@openai-curated`
+- Zotero：`zotero@openai-curated`
+
+当前配置还会启用 Browser 插件：`browser@openai-bundled`。如果目标电脑没有安装 GitHub 或 Zotero 插件，只写入 `enabled = true` 还不够，需要先在 Codex 里安装对应插件并完成授权或本地应用配置。
+
 ## 推荐：安全合并配置
 
 在另一台 Windows 电脑上打开 PowerShell，运行：
@@ -109,19 +118,20 @@ $local = Set-TopLevelLine -Text $local -Line 'model = "gpt-5.5"'
 $local = Set-TopLevelLine -Text $local -Line 'model_reasoning_effort = "high"'
 $local = Set-WindowsSandbox -Text $local
 $local = Ensure-PluginEnabled -Text $local -PluginName 'github@openai-curated'
+$local = Ensure-PluginEnabled -Text $local -PluginName 'zotero@openai-curated'
 $local = Ensure-PluginEnabled -Text $local -PluginName 'browser@openai-bundled'
 
 Set-Content -Path $configPath -Value $local -Encoding UTF8
 Remove-Item $remoteConfig -Force
 Write-Host "已安全合并 Codex 配置。备份文件：$backup"
-Write-Host "请重启 Codex。"
+Write-Host "请重启 Codex，并确认 GitHub 与 Zotero 插件已安装且可用。"
 ```
 
 这段脚本会：
 
 - 备份原本的本地 `config.toml`。
 - 从 GitHub 下载当前仓库里的 `config.toml`。
-- 合并 `developer_instructions`、模型设置、Windows 沙盒设置，以及 GitHub/Browser 插件开关。
+- 合并 `developer_instructions`、模型设置、Windows 沙盒设置，以及 GitHub/Zotero/Browser 插件开关。
 - 保留另一台电脑本来已有的本地路径、插件缓存、MCP 配置和项目配置。
 
 ## 可选：完整覆盖配置
@@ -138,7 +148,7 @@ New-Item -ItemType Directory -Force -Path $codexHome | Out-Null
 if (Test-Path $configPath) { Copy-Item $configPath $backup }
 Invoke-WebRequest "$repo/config.toml" -OutFile $configPath
 Write-Host "已完整覆盖 Codex 配置。备份文件：$backup"
-Write-Host "请重启 Codex。"
+Write-Host "请重启 Codex，并确认 GitHub 与 Zotero 插件已安装且可用。"
 ```
 
 完整覆盖会把本机路径也一起写入目标电脑，可能需要你之后手动调整项目路径、插件路径或 marketplace 路径。
