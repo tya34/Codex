@@ -8,6 +8,7 @@ Cleanup Audit 必须检查并清理“当前任务相关的所有位置”，不
 3. 本轮任务创建或使用过的其它临时文件、日志文件、缓存文件、辅助脚本、下载包、解压目录、中间产物目录和验证产物。
 
 清理时只删除当前任务产生且不再需要的辅助文件。不要删除用户原本已有的源码、原始输入、最终交付物、配置文件、凭据、持久缓存数据库、已安装的 skills/plugins，或仍可能用于后续工作的文件。
+如果本轮任务为了安全创建了临时备份、回滚文件或导出备份，在操作已验证成功后也必须删除；只有用户明确要求保留、或该备份本身就是用户要求的最终交付物时才可保留，并需在 final 中说明。
 
 递归删除前必须确认解析后的绝对路径位于预期的临时目录、工作区临时目录或本轮明确创建的辅助目录内。
 
@@ -20,18 +21,21 @@ model_reasoning_effort = "high"
 sandbox = "elevated"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-06-11T07:56:50Z"
+last_updated = "2026-06-11T08:14:09Z"
 source_type = "local"
 source = '\\?\C:\Users\田彧安\.codex\.tmp\bundled-marketplaces\openai-bundled'
 
 [plugins."github@openai-curated"]
 enabled = true
 
-[plugins."browser@openai-bundled"]
-enabled = true
-
 [plugins."zotero@openai-curated"]
 enabled = true
 
+[plugins."browser@openai-bundled"]
+enabled = true
+
 [projects.'d:\博士\课题1 二氧化钒全角度光电探测器\模拟\fdtd']
+trust_level = "trusted"
+
+[projects.'c:\users\田彧安\documents\codex\2026-06-11\zotero']
 trust_level = "trusted"
