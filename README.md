@@ -1,6 +1,6 @@
 # Codex 全局配置同步
 
-这个仓库保存当前 Codex 全局配置快照，主要用于在其他电脑上恢复或更新相同的行为规则。
+这个仓库保存当前 Codex 全局配置快照，用于在其他电脑上恢复或更新相同的行为规则。
 
 ## 当前文件
 
@@ -25,6 +25,71 @@ $configPath = Join-Path $codexHome "config.toml"
 $remoteConfig = Join-Path $env:TEMP ("codex-config-" + [guid]::NewGuid().ToString() + ".toml")
 $backup = Join-Path $codexHome ("config.toml.bak-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
 
+function Get-DeveloperInstructionsBlock {
+    param([string]$Text)
+
+    $literalStart = "developer_instructions = '''"
+    $tripleStart = 'developer_instructions = """'
+
+    $start = $Text.IndexOf($literalStart)
+    if ($start -ge 0) {
+        $bodyStart = $start + $literalStart.Length
+        $end = $Text.IndexOf("'''", $bodyStart)
+        if ($end -lt 0) { throw "developer_instructions literal string is not closed" }
+        return $Text.Substring($start, $end + 3 - $start)
+    }
+
+    $start = $Text.IndexOf($tripleStart)
+    if ($start -ge 0) {
+        $bodyStart = $start + $tripleStart.Length
+        $end = $Text.IndexOf('"""', $bodyStart)
+        if ($end -lt 0) { throw "developer_instructions triple string is not closed" }
+        return $Text.Substring($start, $end + 3 - $start)
+    }
+
+    return $null
+}
+
+function Set-DeveloperInstructionsBlock {
+    param([string]$Text, [string]$Block)
+
+    $old = Get-DeveloperInstructionsBlock -Text $Text
+    if ($old) {
+        return $Text.Replace($old, $Block)
+    }
+    return $Block + "`n`n" + $Text
+}
+
+function Set-TopLevelLine {
+    param([string]$Text, [string]$Line)
+
+    $key = $Line.Split('=')[0].Trim()
+    $pattern = "(?m)^" + [regex]::Escape($key) + "\s*=.*$"
+    if ($Text -match $pattern) {
+        return [regex]::Replace($Text, $pattern, $Line, 1)
+    }
+    return $Line + "`n" + $Text
+}
+
+function Set-WindowsSandbox {
+    param([string]$Text)
+
+    $sectionPattern = '(?ms)^\[windows\].*?(?=^\[|\z)'
+    $section = "[windows]`nsandbox = \"elevated\"`n"
+    if ($Text -match $sectionPattern) {
+        return [regex]::Replace($Text, $sectionPattern, $section, 1)
+    }
+    return $Text.TrimEnd() + "`n`n" + $section
+}
+
+function Ensure-PluginEnabled {
+    param([string]$Text, [string]$PluginName)
+
+    $section = "[plugins.\"$PluginName\"]"
+    if ($Text.Contains($section)) { return $Text }
+    return $Text.TrimEnd() + "`n`n$section`nenabled = true`n"
+}
+
 New-Item -ItemType Directory -Force -Path $codexHome | Out-Null
 Invoke-WebRequest "$repo/config.toml" -OutFile $remoteConfig
 
@@ -36,40 +101,15 @@ if (Test-Path $configPath) {
 }
 
 $remote = Get-Content $remoteConfig -Raw -Encoding UTF8
-$instructionPattern = '(?s)developer_instructions\s*=\s*(''\'\'\'.*?\'\'\''' + '|""".*?""")'
-$instruction = [regex]::Match($remote, $instructionPattern).Value
+$instruction = Get-DeveloperInstructionsBlock -Text $remote
 if (-not $instruction) { throw "未能从远端 config.toml 中读取 developer_instructions" }
 
-if ($local -match $instructionPattern) {
-    $local = [regex]::Replace($local, $instructionPattern, [System.Text.RegularExpressions.MatchEvaluator]{ param($m) $instruction }, 1)
-} else {
-    $local = $instruction + "`n`n" + $local
-}
-
-foreach ($line in @(
-    'model = "gpt-5.5"',
-    'model_reasoning_effort = "high"'
-)) {
-    $key = $line.Split('=')[0].Trim()
-    if ($local -match "(?m)^$([regex]::Escape($key))\s*=") {
-        $local = [regex]::Replace($local, "(?m)^$([regex]::Escape($key))\s*=.*$", $line, 1)
-    } else {
-        $local = $line + "`n" + $local
-    }
-}
-
-if ($local -notmatch '(?m)^\[windows\]') {
-    $local += "`n[windows]`nsandbox = \"elevated\"`n"
-} elseif ($local -match '(?ms)^\[windows\].*?(?=^\[|\z)') {
-    $local = [regex]::Replace($local, '(?ms)^\[windows\].*?(?=^\[|\z)', "[windows]`nsandbox = \"elevated\"`n", 1)
-}
-
-foreach ($plugin in @('github@openai-curated', 'browser@openai-bundled')) {
-    $section = "[plugins.\"$plugin\"]"
-    if ($local -notmatch [regex]::Escape($section)) {
-        $local += "`n$section`nenabled = true`n"
-    }
-}
+$local = Set-DeveloperInstructionsBlock -Text $local -Block $instruction
+$local = Set-TopLevelLine -Text $local -Line 'model = "gpt-5.5"'
+$local = Set-TopLevelLine -Text $local -Line 'model_reasoning_effort = "high"'
+$local = Set-WindowsSandbox -Text $local
+$local = Ensure-PluginEnabled -Text $local -PluginName 'github@openai-curated'
+$local = Ensure-PluginEnabled -Text $local -PluginName 'browser@openai-bundled'
 
 Set-Content -Path $configPath -Value $local -Encoding UTF8
 Remove-Item $remoteConfig -Force
@@ -81,7 +121,7 @@ Write-Host "请重启 Codex。"
 
 - 备份原本的本地 `config.toml`。
 - 从 GitHub 下载当前仓库里的 `config.toml`。
-- 只合并 `developer_instructions`、模型设置、Windows 沙盒设置，以及 GitHub/Browser 插件开关。
+- 合并 `developer_instructions`、模型设置、Windows 沙盒设置，以及 GitHub/Browser 插件开关。
 - 保留另一台电脑本来已有的本地路径、插件缓存、MCP 配置和项目配置。
 
 ## 可选：完整覆盖配置
