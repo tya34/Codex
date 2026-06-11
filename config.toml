@@ -20,7 +20,7 @@ model_reasoning_effort = "high"
 sandbox = "elevated"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-06-11T07:45:54Z"
+last_updated = "2026-06-11T07:56:50Z"
 source_type = "local"
 source = '\\?\C:\Users\田彧安\.codex\.tmp\bundled-marketplaces\openai-bundled'
 
@@ -28,6 +28,9 @@ source = '\\?\C:\Users\田彧安\.codex\.tmp\bundled-marketplaces\openai-bundled
 enabled = true
 
 [plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."zotero@openai-curated"]
 enabled = true
 
 [projects.'d:\博士\课题1 二氧化钒全角度光电探测器\模拟\fdtd']
