@@ -14,27 +14,56 @@ Cleanup Audit 必须检查并清理“当前任务相关的所有位置”，不
 
 final 答复必须包含一行以“清理检查：”开头的简短说明，说明检查了哪些相关目录、删除了什么、保留了哪些最终文件；如果未清理或不适合清理，必须说明原因。
 
-GitHub 操作方式选择规则：
-1. 小型文档或配置更新，优先使用 Codex GitHub 连接器；它不需要本地 clone，也不依赖本机 git/gh 是否可用，适合快速同步确定改动。
-2. 多文件代码修改、需要本地测试、需要完整 diff、需要构建验证或复杂冲突处理时，优先使用 GitHub Desktop 或本地 Git 工作流。
-3. 如果用户想自己掌控提交前检查、查看图形化 diff 或手动确认提交内容，优先建议使用 GitHub Desktop。
-4. 如果用户只想让 Codex 快速同步一个明确的小改动，优先使用 GitHub 连接器；若需要把多个文件合成单个提交，应明确说明连接器默认可能产生逐文件提交，并按需要改用本地 Git 或更完整的 GitHub API 提交流程。
+GitHub 操作默认优先级规则：
+1. 凡涉及 GitHub 仓库的读取、状态核验、文件操作、Issue、Pull Request 或其他远端操作，默认首先使用已安装的 Codex GitHub 插件连接器；不要因为本机 git 或 gh 可用而优先切换到 CLI。
+2. 只有当 GitHub 插件连接器不可用、授权失败、缺少所需能力，或任务明确需要本地工作区时，才使用本地 Git、GitHub Desktop 或 gh 作为后备，并简要说明原因。
+3. 多文件代码修改、需要本地测试、完整 diff、构建验证或复杂冲突处理时，可以先用本地 Git 工作流完成修改与验证；需要远端读取、核验或 API 操作时仍优先使用 GitHub 插件连接器。
+4. 如果用户明确指定 GitHub 插件、GitHub Desktop、本地 Git 或 gh，应遵循用户指定的方式。
+5. 使用 GitHub 插件连接器修改多个文件时，应注意连接器可能产生逐文件提交；若必须合并为单个提交，再改用本地 Git 或 GitHub API 的 blob/tree/commit/ref 流程。
 '''
-model = "gpt-5.5"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 
+service_tier = "default"
+notify = [ "C:\\Users\\田彧安\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\03b1cdac8af3a530\\bin\\node_modules\\@oai\\sky\\bin\\windows\\codex-computer-use.exe", "turn-ended" ]
 [windows]
 sandbox = "elevated"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-06-11T08:14:09Z"
+last_updated = "2026-07-14T09:10:48Z"
 source_type = "local"
 source = '\\?\C:\Users\田彧安\.codex\.tmp\bundled-marketplaces\openai-bundled'
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-07-14T06:25:52Z"
+source_type = "local"
+source = '\\?\C:\Users\田彧安\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
 
 [plugins."github@openai-curated"]
 enabled = true
 
 [plugins."zotero@openai-curated"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
 enabled = true
 
 [plugins."browser@openai-bundled"]
@@ -45,3 +74,39 @@ trust_level = "trusted"
 
 [projects.'c:\users\田彧安\documents\codex\2026-06-11\zotero']
 trust_level = "trusted"
+
+[projects.'c:\users\田彧安\documents\codex\2026-06-25\new-chat']
+trust_level = "trusted"
+
+[projects.'c:\users\田彧安\documents\codex\2026-06-28\wo-d']
+trust_level = "trusted"
+
+[projects.'c:\users\田彧安\documents\codex\2026-06-28\wo-d\literature']
+trust_level = "trusted"
+
+[features]
+js_repl = false
+
+[mcp_servers.node_repl]
+args = []
+command = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\runtimes\cua_node\03b1cdac8af3a530\bin\node_repl.exe'
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\runtimes\cua_node\03b1cdac8af3a530\bin\node_modules'
+NODE_REPL_NODE_PATH = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\runtimes\cua_node\03b1cdac8af3a530\bin\node.exe'
+NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\田彧安\.codex'
+CODEX_HOME = 'C:\Users\田彧安\.codex'
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "7ed52dae165c3bc22b6d24f282e2c1fbc87f6949fbbe037767a7418d8f517f01,cf732b4a285497bfd7e75a2ac14879bce9ae644eb4e1babeb17bb6a840dfc9bd"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.707.72221"
+SKY_CUA_NATIVE_PIPE = "1"
+SKY_CUA_NATIVE_PIPE_DIRECTORY = '\\.\pipe\codex-computer-use-0f083e87-5446-44d1-bb51-6e9c6f860678'
+CODEX_CLI_PATH = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\bin\3135b80b111fd431\codex.exe'
+
+[desktop]
+followUpQueueMode = "queue"
