@@ -1,19 +1,28 @@
 # Codex 全局配置同步
 
-这个仓库保存我的 Codex 全局配置快照，用于在其它设备上恢复或更新相同的行为规则。
+这个仓库保存我的 Codex 全局配置快照与可迁移行为规则，用于在其它设备上恢复一致的 Codex 工作方式，并记录 GitHub 插件连接器优先的远端操作策略。
 
 ## 当前文件
 
 - `AGENTS.override.md`：全局强制指导文件。当前用于写入 Cleanup Audit 硬规则，优先级高于普通 `AGENTS.md`。
-- `config.toml`：Codex 配置快照。包含 `developer_instructions`、模型设置、沙盒设置、插件开关和本机项目 trust 路径。
+- `config.toml`：Codex 当前配置快照。包含 `developer_instructions`、模型与推理设置、沙盒设置、marketplace、插件开关、MCP、桌面行为和本机项目 trust 路径。
 
 `config.toml` 里可能包含本机路径，例如用户名、插件缓存目录、marketplace 路径、MCP 路径和项目 trust 路径。不同电脑上这些路径通常不一样，所以跨设备同步时优先使用 `AGENTS.override.md`，不要盲目整份覆盖 `config.toml`。
 
 ## 本次更新
 
-本次更新新增 `AGENTS.override.md`，把 Cleanup Audit 写入全局强制指导层。规则要求：凡是任务涉及生成、下载、安装、解压、转换、导出、构建、运行脚本、写日志、临时缓存或中间产物，Codex 在发送 final 前必须做 Cleanup Audit，并且 final 必须包含一行以 `清理检查：` 开头的说明。
+本次更新同步了本机当前的 `config.toml` 快照，模型设置更新为 `gpt-5.6-sol`，并记录当前启用的 marketplace、插件、MCP 和桌面配置。
 
-Cleanup Audit 必须检查当前任务相关的所有位置，而不是只检查一个固定目录；只能删除当前任务产生且不再需要的辅助文件，不能删除用户原始输入、最终交付物、配置文件、凭据、持久缓存数据库或已安装的 skills/plugins。
+GitHub 操作规则已调整为“插件连接器优先”：
+
+- GitHub 仓库读取、状态核验、文件操作、Issue、Pull Request 和其他远端操作，默认先使用已安装的 Codex GitHub 插件连接器。
+- 只有连接器不可用、授权失败、能力不足，或任务明确需要本地工作区时，才使用本地 Git、GitHub Desktop 或 `gh`。
+- 多文件修改、构建和测试可以在本地完成；远端读取、核验和 API 操作仍优先使用 GitHub 插件。
+- 用户明确指定工具时，以用户指定的方式为准。
+
+Cleanup Audit 硬规则保持不变：凡是任务涉及生成、下载、安装、构建、日志、缓存或中间产物，Codex 在发送 final 前必须检查并清理当前任务产生且不再需要的辅助文件，并在 final 中包含一行以 `清理检查：` 开头的说明。
+
+安全说明：仓库是公开的。上传前已检查当前配置，未发现 token、密码、私钥或带认证信息的 URL；但 `config.toml` 仍包含本机路径和运行时标识，跨设备使用时应优先采用下方的安全合并方式。
 
 ## 推荐：更新强制指令层
 
@@ -117,7 +126,7 @@ $instruction = Get-DeveloperInstructionsBlock -Text $remote
 if (-not $instruction) { throw "未能从远端 config.toml 中读取 developer_instructions" }
 
 $local = Set-DeveloperInstructionsBlock -Text $local -Block $instruction
-$local = Set-TopLevelLine -Text $local -Line 'model = "gpt-5.5"'
+$local = Set-TopLevelLine -Text $local -Line 'model = "gpt-5.6-sol"'
 $local = Set-TopLevelLine -Text $local -Line 'model_reasoning_effort = "high"'
 $local = Ensure-PluginEnabled -Text $local -PluginName 'github@openai-curated'
 $local = Ensure-PluginEnabled -Text $local -PluginName 'zotero@openai-curated'
@@ -157,7 +166,14 @@ Write-Host "请完全重启 Codex。"
 同步配置后，请确认至少安装并启用这些插件：
 
 - GitHub：`github@openai-curated`
-- Browser：`browser@openai-bundled`
 - Zotero：`zotero@openai-curated`
+- Documents：`documents@openai-primary-runtime`
+- PDF：`pdf@openai-primary-runtime`
+- Spreadsheets：`spreadsheets@openai-primary-runtime`
+- Presentations：`presentations@openai-primary-runtime`
+- Template Creator：`template-creator@openai-primary-runtime`
+- Sites：`sites@openai-bundled`
+- Visualize：`visualize@openai-bundled`
+- Browser：`browser@openai-bundled`
 
 只在 `config.toml` 里写入 `enabled = true` 不等于插件已经安装或授权完成。新设备上仍需要在 Codex 里安装对应插件，并完成 GitHub 授权或 Zotero 本地应用配置。
