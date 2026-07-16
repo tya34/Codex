@@ -5,13 +5,13 @@
 ## 当前文件
 
 - `AGENTS.override.md`：全局强制指导文件。当前用于写入 Cleanup Audit 硬规则，优先级高于普通 `AGENTS.md`。
-- `config.toml`：Codex 当前配置快照。包含 `developer_instructions`、模型与推理设置、沙盒设置、marketplace、插件开关、MCP、桌面行为和本机项目 trust 路径。
+- `config.toml`：Codex 当前配置快照。包含 `developer_instructions`、沙盒设置、marketplace、插件开关、MCP、桌面行为和本机项目 trust 路径。
 
 `config.toml` 里可能包含本机路径，例如用户名、插件缓存目录、marketplace 路径、MCP 路径和项目 trust 路径。不同电脑上这些路径通常不一样，所以跨设备同步时优先使用 `AGENTS.override.md`，不要盲目整份覆盖 `config.toml`。
 
 ## 本次更新
 
-本次更新同步了本机当前的 `config.toml` 快照，模型设置更新为 `gpt-5.6-sol`，并记录当前启用的 marketplace、插件、MCP 和桌面配置。
+本次更新删除了 `config.toml` 中固定的 `model` 和 `model_reasoning_effort` 设置。模型与推理强度改为由用户在 Codex 界面中手动选择，仓库同步不再覆盖这两个选择；其余 marketplace、插件、MCP 和桌面配置保持记录。
 
 GitHub 操作规则已调整为“插件连接器优先”：
 
@@ -96,14 +96,6 @@ function Set-DeveloperInstructionsBlock {
     return $Block + "`n`n" + $Text
 }
 
-function Set-TopLevelLine {
-    param([string]$Text, [string]$Line)
-    $key = $Line.Split('=')[0].Trim()
-    $pattern = "(?m)^" + [regex]::Escape($key) + "\s*=.*$"
-    if ($Text -match $pattern) { return [regex]::Replace($Text, $pattern, $Line, 1) }
-    return $Line + "`n" + $Text
-}
-
 function Ensure-PluginEnabled {
     param([string]$Text, [string]$PluginName)
     $section = '[plugins."' + $PluginName + '"]'
@@ -126,8 +118,6 @@ $instruction = Get-DeveloperInstructionsBlock -Text $remote
 if (-not $instruction) { throw "未能从远端 config.toml 中读取 developer_instructions" }
 
 $local = Set-DeveloperInstructionsBlock -Text $local -Block $instruction
-$local = Set-TopLevelLine -Text $local -Line 'model = "gpt-5.6-sol"'
-$local = Set-TopLevelLine -Text $local -Line 'model_reasoning_effort = "high"'
 $local = Ensure-PluginEnabled -Text $local -PluginName 'github@openai-curated'
 $local = Ensure-PluginEnabled -Text $local -PluginName 'zotero@openai-curated'
 $local = Ensure-PluginEnabled -Text $local -PluginName 'browser@openai-bundled'
@@ -139,7 +129,7 @@ Write-Host "已安全合并 Codex 配置。备份文件：$backup"
 Write-Host "请完全重启 Codex。"
 ```
 
-这段脚本会保留目标电脑原有的本机路径、MCP 配置、marketplace 路径和项目 trust 配置，只合并通用规则与常用插件开关。
+这段脚本会保留目标电脑原有的模型选择、推理强度、本机路径、MCP 配置、marketplace 路径和项目 trust 配置，只合并通用规则与常用插件开关。
 
 ## 可选：完整覆盖 config.toml
 

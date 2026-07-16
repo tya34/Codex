@@ -21,9 +21,6 @@ GitHub 操作默认优先级规则：
 4. 如果用户明确指定 GitHub 插件、GitHub Desktop、本地 Git 或 gh，应遵循用户指定的方式。
 5. 使用 GitHub 插件连接器修改多个文件时，应注意连接器可能产生逐文件提交；若必须合并为单个提交，再改用本地 Git 或 GitHub API 的 blob/tree/commit/ref 流程。
 '''
-model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
-
 service_tier = "default"
 notify = [ "C:\\Users\\田彧安\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\03b1cdac8af3a530\\bin\\node_modules\\@oai\\sky\\bin\\windows\\codex-computer-use.exe", "turn-ended" ]
 [windows]
