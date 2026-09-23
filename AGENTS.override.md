@@ -34,6 +34,13 @@ Before any recursive deletion, verify that the resolved absolute path is inside
 the expected temporary directory, workspace temporary directory, or auxiliary
 directory explicitly created for the current task.
 
+Use ordinary deletion without `-Force` for cleanup. Do not add `-Force` to
+`Remove-Item` or other cleanup deletion commands. If an item is read-only,
+hidden, system-protected, in use, or blocked by permissions or execution policy,
+stop deleting that item, preserve it, and report the reason. Do not automatically
+retry with forced deletion, change attributes or permissions, or switch tools to
+bypass protections. Other independently verified safe cleanup may continue.
+
 The final response must include one short line beginning with `清理检查：`.
 That line must state which relevant directories were checked, what was deleted,
 and which final files were kept. If cleanup was not done or was not appropriate,

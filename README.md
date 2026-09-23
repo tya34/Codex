@@ -9,9 +9,15 @@
 
 `config.toml` 里可能包含本机路径，例如用户名、插件缓存目录、marketplace 路径、MCP 路径和项目 trust 路径。不同电脑上这些路径通常不一样，所以跨设备同步时优先使用 `AGENTS.override.md`，不要盲目整份覆盖 `config.toml`。
 
-## 本次更新
+## 本次更新（2026-09-23）
 
-本次更新删除了 `config.toml` 中固定的 `model` 和 `model_reasoning_effort` 设置。模型与推理强度改为由用户在 Codex 界面中手动选择，仓库同步不再覆盖这两个选择；其余 marketplace、插件、MCP 和桌面配置保持记录。
+清理删除必须使用不带 `-Force` 的普通删除。遇到受保护、被占用、权限不足或执行策略拒绝的项目时，保留并说明，不自动改用强制删除、修改属性/权限或切换工具绕过保护。该规则已同步到 `AGENTS.override.md` 与 `config.toml` 的清理指令。
+
+新增 [全局配置说明](GLOBAL_CONFIG.md)，解释全局配置分层、现有自定义规则、本机配置盘点、仓库历史快照差异和跨设备合并方法。本次不上传本机完整配置，保留仓库其它字段及模型手动选择约定。
+
+## 历史说明：模型选择与 GitHub 规则
+
+此前更新删除了 `config.toml` 中固定的 `model` 和 `model_reasoning_effort` 设置。模型与推理强度改为由用户在 Codex 界面中手动选择，仓库同步不再覆盖这两个选择；其余 marketplace、插件、MCP 和桌面配置保持记录。
 
 GitHub 操作规则已调整为“插件连接器优先”：
 
@@ -20,7 +26,7 @@ GitHub 操作规则已调整为“插件连接器优先”：
 - 多文件修改、构建和测试可以在本地完成；远端读取、核验和 API 操作仍优先使用 GitHub 插件。
 - 用户明确指定工具时，以用户指定的方式为准。
 
-Cleanup Audit 硬规则保持不变：凡是任务涉及生成、下载、安装、构建、日志、缓存或中间产物，Codex 在发送 final 前必须检查并清理当前任务产生且不再需要的辅助文件，并在 final 中包含一行以 `清理检查：` 开头的说明。
+Cleanup Audit 的检查范围保持不变，本次补充普通删除约束：凡是任务涉及生成、下载、安装、构建、日志、缓存或中间产物，Codex 在发送 final 前必须检查并清理当前任务产生且不再需要的辅助文件，并在 final 中包含一行以 `清理检查：` 开头的说明。
 
 安全说明：仓库是公开的。上传前已检查当前配置，未发现 token、密码、私钥或带认证信息的 URL；但 `config.toml` 仍包含本机路径和运行时标识，跨设备使用时应优先采用下方的安全合并方式。
 
@@ -123,7 +129,7 @@ $local = Ensure-PluginEnabled -Text $local -PluginName 'zotero@openai-curated'
 $local = Ensure-PluginEnabled -Text $local -PluginName 'browser@openai-bundled'
 
 Set-Content -Path $configPath -Value $local -Encoding UTF8
-Remove-Item $remoteConfig -Force
+Remove-Item -LiteralPath $remoteConfig -ErrorAction Stop
 
 Write-Host "已安全合并 Codex 配置。备份文件：$backup"
 Write-Host "请完全重启 Codex。"
@@ -150,6 +156,10 @@ Write-Host "请完全重启 Codex。"
 ```
 
 完整覆盖可能把本仓库里的本机路径写入目标电脑，之后可能需要手动调整插件路径、marketplace 路径、MCP 路径和项目 trust 路径。
+
+## 验证后的备份清理
+
+下方清理仅适用于上述示例创建的临时备份。确认配置可解析、新任务已加载规则且不再需要回滚后，检查 `$backup` 确实指向本次备份，再使用 `Remove-Item -LiteralPath $backup -ErrorAction Stop` 普通删除。验证失败或文件受保护时保留并说明原因。不要为了清理修改属性、权限或添加 `-Force`。
 
 ## 插件提醒
 
