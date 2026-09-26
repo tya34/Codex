@@ -9,7 +9,13 @@
 
 `config.toml` 里可能包含本机路径，例如用户名、插件缓存目录、marketplace 路径、MCP 路径和项目 trust 路径。不同电脑上这些路径通常不一样，所以跨设备同步时优先使用 `AGENTS.override.md`，不要盲目整份覆盖 `config.toml`。
 
-## 本次更新（2026-09-23）
+## 本次更新（2026-09-26）
+
+清理删除必须逐条执行：检查与结果核验使用独立的只读命令；每次工具执行调用只运行一条普通删除命令，且只指定一个已核验的明确绝对路径。禁止循环、管道、通配符、路径数组或组合命令批量删除。仍被策略拒绝时停止、保留并说明，不自动重试或绕过。
+
+两处全局指令已同步这项要求。单条普通删除已在本机成功验证，但不能保证所有删除请求都会获准。
+
+## 历史更新（2026-09-23）
 
 清理删除必须使用不带 `-Force` 的普通删除。遇到受保护、被占用、权限不足或执行策略拒绝的项目时，保留并说明，不自动改用强制删除、修改属性/权限或切换工具绕过保护。该规则已同步到 `AGENTS.override.md` 与 `config.toml` 的清理指令。
 
@@ -129,11 +135,12 @@ $local = Ensure-PluginEnabled -Text $local -PluginName 'zotero@openai-curated'
 $local = Ensure-PluginEnabled -Text $local -PluginName 'browser@openai-bundled'
 
 Set-Content -Path $configPath -Value $local -Encoding UTF8
-Remove-Item -LiteralPath $remoteConfig -ErrorAction Stop
 
 Write-Host "已安全合并 Codex 配置。备份文件：$backup"
 Write-Host "请完全重启 Codex。"
 ```
+
+脚本执行并验证成功后，单独检查 `$remoteConfig` 指向的临时文件；然后在独立工具调用中，用 `Remove-Item -LiteralPath '已核验的临时文件绝对路径' -ErrorAction Stop` 删除。将示例路径替换为实际绝对路径，最后另行核验结果。
 
 这段脚本会保留目标电脑原有的模型选择、推理强度、本机路径、MCP 配置、marketplace 路径和项目 trust 配置，只合并通用规则与常用插件开关。
 
@@ -159,7 +166,7 @@ Write-Host "请完全重启 Codex。"
 
 ## 验证后的备份清理
 
-下方清理仅适用于上述示例创建的临时备份。确认配置可解析、新任务已加载规则且不再需要回滚后，检查 `$backup` 确实指向本次备份，再使用 `Remove-Item -LiteralPath $backup -ErrorAction Stop` 普通删除。验证失败或文件受保护时保留并说明原因。不要为了清理修改属性、权限或添加 `-Force`。
+下方清理仅适用于上述示例创建的临时备份。确认配置可解析、新任务已加载规则且不再需要回滚后，检查 `$backup` 确实指向本次备份，再在独立工具调用中使用 `Remove-Item -LiteralPath '已核验的备份绝对路径' -ErrorAction Stop` 普通删除，将示例路径替换为实际绝对路径；多个备份逐条处理，完成后另行核验。验证失败或文件受保护时保留并说明原因。不要为了清理修改属性、权限或添加 `-Force`。
 
 ## 插件提醒
 

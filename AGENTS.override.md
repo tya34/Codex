@@ -41,6 +41,18 @@ stop deleting that item, preserve it, and report the reason. Do not automaticall
 retry with forced deletion, change attributes or permissions, or switch tools to
 bypass protections. Other independently verified safe cleanup may continue.
 
+Execute cleanup deletions one at a time. First inspect the target path,
+attributes, and cleanup scope with a separate read-only command. Then run
+exactly one ordinary deletion command per tool execution call, targeting one
+verified explicit absolute path. In PowerShell, use Remove-Item -LiteralPath
+with -ErrorAction Stop and without -Force. Do not combine deletion with
+inspection or other operations in the same command; do not batch deletions
+using loops, pipelines, wildcards, path arrays, or chained commands. Wait for
+each deletion to finish before executing the next. Verify results afterward
+with a separate read-only command. This approach does not guarantee policy
+approval. If a deletion is still rejected, stop, preserve the item, and report
+the reason as required above; do not automatically retry or bypass the block.
+
 The final response must include one short line beginning with `清理检查：`.
 That line must state which relevant directories were checked, what was deleted,
 and which final files were kept. If cleanup was not done or was not appropriate,
