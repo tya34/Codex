@@ -1,124 +1,77 @@
-# Codex 全局配置说明
+# Codex 当前配置盘点
 
-更新日期：2026-09-26。本文记录本次清理规则更新、配置分层和本机配置盘点，供维护与跨设备合并使用；不是 Codex 出厂配置的逐字差异报告。
+更新时间：2026-10-04（Asia/Shanghai）。数据来自当前设备配置文件、技能目录计数和应用偏好的只读检查。
 
-## 1. 本次更新：逐条执行普通删除
+## 文件与规则
 
-清理删除必须逐条执行：检查与结果核验使用独立的只读命令；每次工具执行调用只运行一条普通删除命令，且只指定一个已核验的明确绝对路径。禁止循环、管道、通配符、路径数组或组合命令批量删除。仍被策略拒绝时停止、保留并说明，不自动重试或绕过。
-
-PowerShell 删除命令采用 `Remove-Item -LiteralPath '已核验的绝对路径' -ErrorAction Stop`，不添加 `-Force`。每条命令完成后再执行下一条。此前组合命令被执行策略拒绝，单条普通删除成功；具体拦截原因未明确，此规则不修改内置安全策略。
-
-清理删除操作不使用 `-Force`。在核对目标路径和保留文件后，使用普通删除；需要删除目录树时仍须先确认解析后的绝对路径属于本任务的辅助目录。
-
-遇到只读、隐藏、系统属性、被占用的文件，或权限不足、执行策略拒绝时：
-- 停止删除受影响的项目，保留并说明原因。
-- 不自动升级为强制删除，不修改文件属性或权限，不切换工具绕过保护。
-- 其它已独立确认可以安全清理的项目可以继续处理。
-
-这个约束仅针对清理删除操作，不是禁止所有命令使用名为 `-Force` 的参数；例如创建目录的参数与删除文件不是同一操作。
-
-本次更新同步到两个全局入口：
-- `~/.codex/AGENTS.override.md`：英文清理指令。
-- `~/.codex/config.toml` 的 `developer_instructions`：中文清理指令。
-
-仓库中的同名文件也已加入相同规则。此次不调整审批策略、沙箱、模型、权限或执行器的内置检查。
-
-## 2. 清理检查的完整要求
-
-涉及生成、下载、安装、解压、转换、导出、构建、运行脚本、写日志、缓存或中间产物时，最终答复前必须进行 Cleanup Audit。
-
-检查范围包括：
-- 当前任务实际使用的 work、outputs、下载、构建、日志、缓存和辅助脚本目录。
-- 工具和验证过程实际使用的系统临时目录。
-- 本任务在其他位置创建或使用的辅助产物。
-
-只删除本任务产生且不再需要的辅助文件。保留用户输入、源码、最终交付物、配置、凭据、证据、持久缓存数据库、已安装插件/技能，以及后续仍需使用的文件。
-
-临时安全备份在操作验证成功后也应清理；用户要求保留，或备份本身是交付物时除外。若保留，应说明原因。
-
-最终回复必须有一行以“清理检查：”开头，说明检查范围、删除内容和保留的交付物；没有清理或不适合清理时说明原因。
-
-## 3. 全局文件与作用
-
-| 文件 | 用途与本次状态 |
+| 项目 | 当前状态 |
 | --- | --- |
-| `~/.codex/AGENTS.md` | 普通全局指导文件；本机盘点时为空，本次未修改 |
-| `~/.codex/AGENTS.override.md` | 全局覆盖指导文件；本次补充普通删除规则 |
-| `~/.codex/config.toml` | 模型、权限、插件、MCP、界面偏好等；本次只修改清理指令段落 |
-| `~/.codex/GLOBAL_CONFIG.md` | 本说明的本地副本；属于文档，不是自动执行或强制加载的指令文件 |
-| `~/.codex/skills/` | 用户安装的技能；不代表每项技能在所有任务中始终生效 |
-| `~/.codex/.codex-global-state.json` | 应用状态与界面偏好；通常由应用维护，不建议直接复制到另一台设备 |
+| 全局目录 | `C:\Users\tiany\.codex` |
+| `AGENTS.md` | 空文件 |
+| `AGENTS.override.md` | 完整 Cleanup Audit 规则，与覆盖前仓库规则一致 |
+| `config.toml` | 已同步本机当前完整文本 |
+| `developer_instructions` | 未显式配置 |
+| 本机 `GLOBAL_CONFIG.md` | 不存在；本文为仓库说明 |
+| 用户级 `rules/`、`requirements.toml`、`hooks.json` | 未发现 |
 
-官方全局指令发现机制会优先考虑 `AGENTS.override.md`；不要认为它和同目录的 `AGENTS.md` 总会完整叠加。配置还可能受项目、任务或托管设置影响。检查是否生效应以新任务实际加载的指令和权限为准。
+清理要求仍保存在全局覆盖指令中，当前会话也已加载该要求。配置没有重复写入中文清理规则，也没有旧仓库的 GitHub 插件优先指令。
 
-清理要求在覆盖指令与 `developer_instructions` 中重复维护是当前已有结构；本次保留该结构，并同步修改两处，避免内容不一致。
+## 显式配置
 
-## 4. 额外的 GitHub 操作规则
-
-`developer_instructions` 另有 GitHub 插件优先规则：
-- 仓库读取、状态核验、文件、Issue、PR 和其它远端操作，默认先用 GitHub 插件连接器。
-- 连接器不可用、授权失败、能力不足，或明确需要本地工作区时，才使用本地 Git、GitHub Desktop 或 gh，并简要说明。
-- 本地多文件修改、测试、完整 diff、构建和复杂冲突可在本地处理；远端 API 操作仍优先使用连接器。
-- 用户明确指定工具时遵循用户要求。
-- 需要把多文件变化合为一次提交时，可使用 Git blob/tree/commit/ref 流程。
-
-本次通过 GitHub 连接器同步，不要求覆盖另一台设备的本机路径。
-
-## 5. 本机配置盘点（2026-09-23）
-
-以下是检查时本机显式保存的值，不是新设备推荐默认值，也不是说每项都不同于出厂值。此表不会改变配置。
-
-| 配置 | 盘点值 |
+| 配置 | 值 |
 | --- | --- |
 | 默认模型 | `gpt-6-astra` |
 | 推理强度 | `medium` |
-| 表达风格 | `pragmatic` |
-| 沙箱模式 | `danger-full-access` |
-| 审批策略 | `never` |
-| Windows 沙箱后端设置 | `elevated`；不代表完整访问任务正在使用沙箱 |
-| 项目信任记录 | 21 个；路径不在本文公开 |
-| 环境建议 | `ambient-suggestions-enabled = false` |
-| 详情显示 | `conversationDetailMode = "STEPS_COMMANDS"` |
+| Windows 沙箱后端 | `elevated` |
 | 后续消息 | `followUpQueueMode = "queue"` |
-| 功能标志 | `js_repl = false` |
-| 自动上下文应用偏好 | `composer-auto-context-enabled = false` |
-| 完整访问确认应用偏好 | `skip-full-access-confirm = true`；不是命令审批开关 |
+| Node REPL 启动超时 | 120 秒 |
+| 浏览器后端 | `chrome,iab,mcpapps` |
+| TinySky | `BROWSER_USE_TINYSKY_ENABLED = "1"` |
+| 配置记录的应用版本 | `26.930.31730` |
+| 本地插件市场 | `openai-primary-runtime`、`openai-bundled` |
 
-`approval_policy = "never"` 表示不请求审批，不表示危险命令会无条件放行。普通删除规则改变的是清理操作的选择，不会移除内置安全检查。
+以下字段未显式设置：`service_tier`、`personality`、`approval_policy`、`features.js_repl`。没有 `projects` 项目信任条目。未设置不等于关闭，也不代表没有客户端或托管配置影响。
 
-本机 config 显式启用了 12 个插件：Documents、Spreadsheets、Presentations、GitHub、Zotero、PDF、Template Creator、Visualize、Browser、Computer Use、Codex App Tools、Unified Computer Use。
+同步期间用户切换了权限；最终配置显式保存 `sandbox_mode = "danger-full-access"`，当前会话审批策略为 `never`（未写入此配置文件）。配置还保存了默认打开方式 `systemDefault` 和 GitHub `update_file` 工具的 `approval_mode = "approve"`。Windows 的 `elevated` 后端字段不能单独用来推断完整访问权限。
 
-此外配置了 `node_repl` MCP（启动超时 120 秒）、电脑控制回合结束通知、浏览器运行时及两个本地插件市场。这些多为应用或插件维护的环境配置，不能全部认定为手工定制，也不能仅凭 `enabled = true` 认定插件已经安装或授权。
+## 插件与技能
 
-用户技能目录排除 `.system` 后共有 173 个目录：Blender/BlendOps 59、Bonsai 14、IfcOpenShell 19、Sverchok 12、COMSOL 8、Lumerical 2、其它工作流 59。本次不上传技能文件。
+`config.toml` 显式启用以下 9 个插件：
 
-盘点时未发现用户级 `rules/`、`requirements.toml` 或 `hooks.json`。这不排除客户端内置检查、其它配置层或托管策略。
+- Documents
+- PDF
+- Spreadsheets
+- Presentations
+- Template Creator
+- Browser
+- Unified Computer Use
+- Computer Use
+- Visualize
 
-## 6. 本机配置与仓库快照的区别
+GitHub、Zotero、Sites 没有独立开关条目，但本次会话提供了这些能力；GitHub 连接器已实际完成仓库读取与此次同步。不能仅凭配置条目判断安装或授权状态。
 
-仓库原有 `config.toml` 是旧设备快照，含历史本机路径及运行时标识，并非本机当前配置的完整镜像。仓库此前明确移除了固定模型和推理强度，让使用者自行选择；本次继续保留这个约定。
+用户技能目录排除 `.system` 后为 173 个。仓库不包含技能文件，因此这个计数不证明技能内容或版本相同。
 
-本次只向该旧快照的 `developer_instructions` 增加普通删除规则：
-- 不把本机当前模型、信任项目路径、MCP 管道、浏览器哈希等新值复制到公开仓库。
-- 不覆盖或删除快照里其它历史字段。
-- 本说明只公开可解释的配置项和计数，不包含凭据或新暴露的个人绝对路径。
-- 历史快照原有本机路径仍然存在；本次不清理 Git 历史，也不宣称仓库完全不含设备信息。
+## 应用偏好
 
-## 7. 跨设备合并与验证
+本机应用状态中读取到：
 
-1. 先查看目标设备现有文件，保留自己的其它指令。
-2. 把普通删除段落合并到 `AGENTS.override.md` 与 `config.toml` 的清理段落；避免重复追加。
-3. 不整份复制旧设备的 config，不覆盖目标设备的模型选择、MCP、插件缓存路径和项目路径。
-4. 确认 TOML 仍可解析，且修改仅涉及预期段落。
-5. 新建任务检查指令是否已加载；若客户端未刷新配置，再完整退出并重启。
-6. 确认成功后，按普通删除规则清理本次产生的下载文件及临时备份；验证失败则保留所需回滚文件并说明。
+- `composer-auto-context-enabled = false`
+- `skip-full-access-confirm = true`
 
-可以让新任务复述：“清理删除是否禁止使用 -Force？遇到受保护文件应如何处理？”但模型复述只是辅助检查，还应结合实际文件和任务加载状态判断。
+这些应用状态没有随配置文件上传。`skip-full-access-confirm` 不是命令审批策略。
 
-## 8. 参考
+## 相对旧快照的变化
 
-- [Codex 全局指导文件](https://developers.openai.com/codex/guides/agents-md)
-- [Codex 配置与优先级](https://developers.openai.com/codex/config-basic)
-- [Codex 命令规则](https://developers.openai.com/codex/rules)
+- 使用当前设备用户名与运行时路径替换旧设备路径。
+- 写入当前模型 `gpt-6-astra` 与 `medium` 推理强度，取代旧仓库不固定模型的约定。
+- 移除本机未配置的 `developer_instructions`、`service_tier`、历史项目信任记录、`features.js_repl` 与市场更新时间字段。
+- 插件显式开关与本机一致：不再保留旧快照中的 GitHub、Zotero、Sites 条目，加入 Computer Use 与 Unified Computer Use。
+- 更新 Node REPL 的环境变量、可信服务、浏览器后端和运行时标识。
+- 全局清理规则保持不变。
 
-本次变更仅增加清理行为约束和说明，没有放宽权限或绕过任何安全策略。
+旧说明中的 21 个信任项目、12 个显式插件属于历史盘点；权限状态以本次重新核验值为准。本次覆盖文件内容，保留 Git 提交历史。
+
+## 维护原则
+
+跨设备迁移时选择性合并可迁移规则与偏好，保留目标设备自身路径和运行时。更新后核对配置文件及新会话实际加载状态。临时备份与中间文件按 `AGENTS.override.md` 的逐项普通删除规则处理。
