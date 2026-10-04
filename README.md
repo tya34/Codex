@@ -16,6 +16,7 @@
 - 默认模型：`gpt-6-astra`。
 - 推理强度：`medium`。
 - 后续消息模式：`queue`。
+- 当前显式访问模式：`danger-full-access`。
 - Windows 沙箱后端设置：`elevated`。
 - `node_repl` MCP 启动超时：120 秒。
 - 配置记录的 Codex 应用版本：`26.930.31730`。
