@@ -1,8 +1,12 @@
 notify = [ "C:\\Users\\tiany\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\45309f9050f7314b\\bin\\node_modules\\@oai\\sky\\bin\\windows\\codex-computer-use.exe", "turn-ended" ]
 model = "gpt-6-astra"
 model_reasoning_effort = "medium"
+sandbox_mode = "danger-full-access"
 [desktop]
 followUpQueueMode = "queue"
+
+[desktop.open-in-target-preferences]
+global = "systemDefault"
 
 [marketplaces.openai-primary-runtime]
 source_type = "local"
@@ -65,3 +69,6 @@ NODE_REPL_UNTRUSTED_ENV_ALLOWLIST = "CODEX_WINDOWS_REGISTERED_CORE"
 
 [windows]
 sandbox = "elevated"
+
+[apps.connector_76869538009648d5b282a4bb21c3d157.tools."github.update_file"]
+approval_mode = "approve"
