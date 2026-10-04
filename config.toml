@@ -1,50 +1,16 @@
-developer_instructions = '''
-清理检查硬规则：
-凡是当前任务涉及生成、下载、安装、解压、转换、导出、构建、运行脚本、写日志、创建辅助脚本、临时缓存或中间产物，在发送 final 前必须做一次 Cleanup Audit。
-
-Cleanup Audit 必须检查并清理“当前任务相关的所有位置”，不能只检查某一个固定文件夹或单一目录。检查范围至少包括：
-1. 当前工作区中与本轮任务相关的 work、outputs、下载目录、解压目录、构建目录、日志目录、缓存目录、临时脚本目录和中间产物目录。
-2. 本轮工具、脚本、安装器、转换器、构建器、导出器、压缩/解压工具、浏览器验证、渲染验证或测试命令实际使用过的系统临时目录。
-3. 本轮任务创建或使用过的其它临时文件、日志文件、缓存文件、辅助脚本、下载包、解压目录、中间产物目录和验证产物。
-
-清理时只删除当前任务产生且不再需要的辅助文件。不要删除用户原本已有的源码、原始输入、最终交付物、配置文件、凭据、持久缓存数据库、已安装的 skills/plugins，或仍可能用于后续工作的文件。
-如果本轮任务为了安全创建了临时备份、回滚文件或导出备份，在操作已验证成功后也必须删除；只有用户明确要求保留、或该备份本身就是用户要求的最终交付物时才可保留，并需在 final 中说明。
-
-递归删除前必须确认解析后的绝对路径位于预期的临时目录、工作区临时目录或本轮明确创建的辅助目录内。
-
-清理删除操作必须使用不带 -Force 的普通删除；不得在 Remove-Item 等删除命令中添加 -Force。遇到只读、隐藏、系统属性、被占用的文件，或权限不足、执行策略拒绝时，停止删除受影响的项目，保留并说明原因；不得自动改用强制删除、修改属性/权限，或切换工具绕过保护。其它已确认可安全清理的项目可以继续处理。
-
-清理删除必须逐条执行：先通过独立的只读命令检查目标路径、属性和清理范围，再在每次工具执行调用中只运行一条普通删除命令，且每条命令只指定一个已核验的明确绝对路径。PowerShell 使用 Remove-Item -LiteralPath 与 -ErrorAction Stop，不添加 -Force。不得把删除与检查或其它操作放进同一条组合命令，也不得使用循环、管道、通配符、路径数组或命令拼接批量删除。每条删除命令完成后再执行下一条；完成后用独立的只读命令核验结果。此方式不保证安全策略放行；若仍被拒绝，遵循上述停止、保留并说明的规则，不自动重试或绕过。
-
-final 答复必须包含一行以“清理检查：”开头的简短说明，说明检查了哪些相关目录、删除了什么、保留了哪些最终文件；如果未清理或不适合清理，必须说明原因。
-
-GitHub 操作默认优先级规则：
-1. 凡涉及 GitHub 仓库的读取、状态核验、文件操作、Issue、Pull Request 或其他远端操作，默认首先使用已安装的 Codex GitHub 插件连接器；不要因为本机 git 或 gh 可用而优先切换到 CLI。
-2. 只有当 GitHub 插件连接器不可用、授权失败、缺少所需能力，或任务明确需要本地工作区时，才使用本地 Git、GitHub Desktop 或 gh 作为后备，并简要说明原因。
-3. 多文件代码修改、需要本地测试、完整 diff、构建验证或复杂冲突处理时，可以先用本地 Git 工作流完成修改与验证；需要远端读取、核验或 API 操作时仍优先使用 GitHub 插件连接器。
-4. 如果用户明确指定 GitHub 插件、GitHub Desktop、本地 Git 或 gh，应遵循用户指定的方式。
-5. 使用 GitHub 插件连接器修改多个文件时，应注意连接器可能产生逐文件提交；若必须合并为单个提交，再改用本地 Git 或 GitHub API 的 blob/tree/commit/ref 流程。
-'''
-service_tier = "default"
-notify = [ "C:\\Users\\田彧安\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\03b1cdac8af3a530\\bin\\node_modules\\@oai\\sky\\bin\\windows\\codex-computer-use.exe", "turn-ended" ]
-[windows]
-sandbox = "elevated"
-
-[marketplaces.openai-bundled]
-last_updated = "2026-07-14T09:10:48Z"
-source_type = "local"
-source = '\\?\C:\Users\田彧安\.codex\.tmp\bundled-marketplaces\openai-bundled'
+notify = [ "C:\\Users\\tiany\\AppData\\Local\\OpenAI\\Codex\\runtimes\\cua_node\\45309f9050f7314b\\bin\\node_modules\\@oai\\sky\\bin\\windows\\codex-computer-use.exe", "turn-ended" ]
+model = "gpt-6-astra"
+model_reasoning_effort = "medium"
+[desktop]
+followUpQueueMode = "queue"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-07-14T06:25:52Z"
 source_type = "local"
-source = '\\?\C:\Users\田彧安\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
+source = '\\?\C:\Users\tiany\.cache\codex-runtimes\codex-primary-runtime\plugins\openai-primary-runtime'
 
-[plugins."github@openai-curated"]
-enabled = true
-
-[plugins."zotero@openai-curated"]
-enabled = true
+[marketplaces.openai-bundled]
+source_type = "local"
+source = '\\?\C:\Users\tiany\.codex\.tmp\bundled-marketplaces\openai-bundled'
 
 [plugins."documents@openai-primary-runtime"]
 enabled = true
@@ -61,53 +27,41 @@ enabled = true
 [plugins."template-creator@openai-primary-runtime"]
 enabled = true
 
-[plugins."sites@openai-bundled"]
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."unified-computer-use@openai-bundled"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
 enabled = true
 
 [plugins."visualize@openai-bundled"]
 enabled = true
 
-[plugins."browser@openai-bundled"]
-enabled = true
-
-[projects.'d:\博士\课题1 二氧化钒全角度光电探测器\模拟\fdtd']
-trust_level = "trusted"
-
-[projects.'c:\users\田彧安\documents\codex\2026-06-11\zotero']
-trust_level = "trusted"
-
-[projects.'c:\users\田彧安\documents\codex\2026-06-25\new-chat']
-trust_level = "trusted"
-
-[projects.'c:\users\田彧安\documents\codex\2026-06-28\wo-d']
-trust_level = "trusted"
-
-[projects.'c:\users\田彧安\documents\codex\2026-06-28\wo-d\literature']
-trust_level = "trusted"
-
-[features]
-js_repl = false
-
 [mcp_servers.node_repl]
 args = []
-command = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\runtimes\cua_node\03b1cdac8af3a530\bin\node_repl.exe'
+command = 'C:\Users\tiany\AppData\Local\OpenAI\Codex\runtimes\cua_node\45309f9050f7314b\bin\node_repl.exe'
+env_vars = ["CODEX_WINDOWS_REGISTERED_CORE"]
 startup_timeout_sec = 120
 
 [mcp_servers.node_repl.env]
 NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
-NODE_REPL_NODE_MODULE_DIRS = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\runtimes\cua_node\03b1cdac8af3a530\bin\node_modules'
-NODE_REPL_NODE_PATH = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\runtimes\cua_node\03b1cdac8af3a530\bin\node.exe'
-NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\田彧安\.codex'
-CODEX_HOME = 'C:\Users\田彧安\.codex'
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "7ed52dae165c3bc22b6d24f282e2c1fbc87f6949fbbe037767a7418d8f517f01,cf732b4a285497bfd7e75a2ac14879bce9ae644eb4e1babeb17bb6a840dfc9bd"
-BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
-NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+NODE_REPL_NODE_MODULE_DIRS = 'C:\Users\tiany\AppData\Local\OpenAI\Codex\runtimes\cua_node\45309f9050f7314b\bin\node_modules'
+NODE_REPL_NODE_PATH = 'C:\Users\tiany\AppData\Local\OpenAI\Codex\runtimes\cua_node\45309f9050f7314b\bin\node.exe'
+NODE_REPL_TRUSTED_CODE_PATHS = 'C:\Users\tiany\.codex;C:\Users\tiany\AppData\Local\OpenAI\Codex\runtimes\cua_node\45309f9050f7314b\bin\node_modules'
+CODEX_HOME = 'C:\Users\tiany\.codex'
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab,mcpapps"
+BROWSER_USE_TINYSKY_ENABLED = "1"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = ""
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = ""
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.707.72221"
+BROWSER_USE_CODEX_APP_VERSION = "26.930.31730"
+NODE_REPL_TRUSTED_SERVICES = '{"browser":"C:/Users/tiany/.codex/plugins/cache/openai-bundled/browser/26.930.31730/scripts/browser-service.mjs","sky":"@oai/sky/service"}'
 SKY_CUA_NATIVE_PIPE = "1"
-SKY_CUA_NATIVE_PIPE_DIRECTORY = '\\.\pipe\codex-computer-use-0f083e87-5446-44d1-bb51-6e9c6f860678'
-CODEX_CLI_PATH = 'C:\Users\田彧安\AppData\Local\OpenAI\Codex\bin\3135b80b111fd431\codex.exe'
+SKY_CUA_NATIVE_PIPE_DIRECTORY = '\\.\pipe\codex-computer-use-06494a86-a068-4ccb-8ca5-199de19afdf8'
+CODEX_CLI_PATH = 'C:\Users\tiany\AppData\Local\OpenAI\Codex\bin\8aaf1547b825b104\codex.exe'
+NODE_REPL_UNTRUSTED_ENV_ALLOWLIST = "CODEX_WINDOWS_REGISTERED_CORE"
 
-[desktop]
-followUpQueueMode = "queue"
+[windows]
+sandbox = "elevated"
